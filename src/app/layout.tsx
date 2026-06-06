@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import { ThemeScript } from "@/components/marketlab/theme-script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,8 +31,12 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <ThemeScript />
+      </head>
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }

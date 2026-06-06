@@ -1,38 +1,59 @@
-import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
-import { isSupabaseConnected } from "@/lib/supabase/config";
+import { ThemeToggle } from "@/components/marketlab/theme-toggle";
+import { cn } from "@/lib/utils";
 
-function StatusBadge({ children }: { children: React.ReactNode }) {
+function NavLink({
+  href,
+  children,
+  active = false,
+}: {
+  href: string;
+  children: ReactNode;
+  active?: boolean;
+}) {
   return (
-    <div className="flex items-center gap-2 rounded-full border border-[#00d395]/30 bg-[#00d395]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-md shadow-[0_0_15px_rgba(0,211,149,0.15)]">
-      <span className="h-1.5 w-1.5 rounded-full bg-[#00d395] animate-pulse" />
+    <Link
+      href={href}
+      className={cn(
+        "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+        active
+          ? "bg-muted text-foreground"
+          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+      )}
+    >
       {children}
-    </div>
+    </Link>
   );
 }
 
-export function Header() {
+export function Header({ activePath }: { activePath?: "home" | "markets" }) {
   return (
-    <header className="border-b border-white/10 bg-[#080a0d] text-white">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-5 sm:flex-row sm:justify-between">
-        <div>
-          <Link href="/" className="block">
-            <Image
-              src="/logo/logo-marketlab.webp"
-              alt="MarketLab"
-              width={677}
-              height={369}
-              className="h-24 w-44 object-contain"
-              priority
-            />
+    <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+        <div className="flex items-center gap-6">
+          <Link
+            href="/"
+            className="text-lg font-semibold tracking-tight text-foreground"
+          >
+            MarketLab
           </Link>
+          <nav aria-label="Main navigation" className="flex items-center gap-1">
+            <NavLink href="/markets" active={activePath === "markets"}>
+              Markets
+            </NavLink>
+          </nav>
         </div>
-        <div className="flex flex-col items-center gap-2 sm:items-end">
-          <StatusBadge>Cursor Workshop / Quito</StatusBadge>
-          {isSupabaseConnected ? (
-            <StatusBadge>Supabase Connected</StatusBadge>
-          ) : null}
+
+        <div className="flex items-center gap-2">
+          <div
+            className="hidden text-xs text-muted-foreground sm:block"
+            aria-hidden
+          >
+            Auth coming soon
+          </div>
+          <ThemeToggle />
         </div>
       </div>
     </header>
