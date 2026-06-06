@@ -1,13 +1,13 @@
-import { Header } from "@/components/marketlab/header";
+import { HeaderWithAuth } from "@/components/marketlab/header";
 
-export default function MarketsLayout({
+export default async function MarketsLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <div className="min-h-svh bg-background text-foreground">
-      <Header activePath="markets" />
+      <HeaderWithAuth activePath="markets" />
       {children}
     </div>
   );

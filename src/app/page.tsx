@@ -1,12 +1,12 @@
 import Link from "next/link";
 
-import { Header } from "@/components/marketlab/header";
+import { HeaderWithAuth } from "@/components/marketlab/header";
 import { Button } from "@/components/ui/button";
 
-export default function Home() {
+export default async function Home() {
   return (
     <div className="min-h-svh bg-background text-foreground">
-      <Header activePath="home" />
+      <HeaderWithAuth activePath="home" />
 
       <main className="mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl flex-col items-center justify-center px-4 py-14 text-center">
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
