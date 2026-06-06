@@ -1,40 +1,128 @@
-import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
-import { isSupabaseConnected } from "@/lib/supabase/config";
+import { SignOutButton } from "@/components/marketlab/sign-out-button";
+import { ThemeToggle } from "@/components/marketlab/theme-toggle";
+import { getBalanceDisplayLabel } from "@/lib/auth/format";
+import { getCurrentUserProfile } from "@/lib/auth/queries";
+import { getAuthUser } from "@/lib/auth/session";
+import type { Profile } from "@/lib/auth/types";
+import { cn } from "@/lib/utils";
 
-function StatusBadge({ children }: { children: React.ReactNode }) {
+function NavLink({
+  href,
+  children,
+  active = false,
+}: {
+  href: string;
+  children: ReactNode;
+  active?: boolean;
+}) {
   return (
-    <div className="flex items-center gap-2 rounded-full border border-[#00d395]/30 bg-[#00d395]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-md shadow-[0_0_15px_rgba(0,211,149,0.15)]">
-      <span className="h-1.5 w-1.5 rounded-full bg-[#00d395] animate-pulse" />
+    <Link
+      href={href}
+      className={cn(
+        "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+        active
+          ? "bg-muted text-foreground"
+          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+      )}
+    >
       {children}
-    </div>
+    </Link>
   );
 }
 
-export function Header() {
+type HeaderProps = {
+  activePath?: "home" | "markets";
+  userEmail?: string | null;
+  profile?: Profile | null;
+};
+
+export function Header({ activePath, userEmail, profile }: HeaderProps) {
+  const isSignedIn = Boolean(userEmail);
+  const balanceLabel = getBalanceDisplayLabel(profile ?? null);
+
   return (
-    <header className="border-b border-white/10 bg-[#080a0d] text-white">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-5 sm:flex-row sm:justify-between">
-        <div>
-          <Link href="/" className="block">
-            <Image
-              src="/logo/logo-marketlab.webp"
-              alt="MarketLab"
-              width={677}
-              height={369}
-              className="h-24 w-44 object-contain"
-              priority
-            />
+    <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+        <div className="flex items-center gap-6">
+          <Link
+            href="/"
+            className="text-lg font-semibold tracking-tight text-foreground"
+          >
+            MarketLab
           </Link>
+          <nav aria-label="Main navigation" className="flex items-center gap-1">
+            <NavLink href="/markets" active={activePath === "markets"}>
+              Markets
+            </NavLink>
+          </nav>
         </div>
-        <div className="flex flex-col items-center gap-2 sm:items-end">
-          <StatusBadge>Cursor Workshop / Quito</StatusBadge>
-          {isSupabaseConnected ? (
-            <StatusBadge>Supabase Connected</StatusBadge>
-          ) : null}
+
+        <div className="flex items-center gap-2">
+          {isSignedIn ? (
+            <div className="flex items-center gap-2">
+              <div className="rounded-lg border border-border bg-muted/40 px-2 py-1.5 text-xs sm:px-3 sm:text-sm">
+                <span className="text-muted-foreground">Balance</span>{" "}
+                <span className="font-medium text-foreground">
+                  {balanceLabel}
+                </span>
+              </div>
+              <SignOutButton />
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <ButtonLink href="/login" variant="ghost">
+                Sign in
+              </ButtonLink>
+              <ButtonLink href="/signup">Sign up</ButtonLink>
+            </div>
+          )}
+          <ThemeToggle />
         </div>
       </div>
     </header>
+  );
+}
+
+function ButtonLink({
+  href,
+  children,
+  variant = "default",
+}: {
+  href: string;
+  children: ReactNode;
+  variant?: "default" | "ghost";
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "inline-flex h-7 items-center justify-center rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+        variant === "ghost"
+          ? "text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:bg-muted/50"
+          : "bg-primary text-primary-foreground hover:bg-primary/80",
+      )}
+    >
+      {children}
+    </Link>
+  );
+}
+
+export async function HeaderWithAuth({
+  activePath,
+}: {
+  activePath?: "home" | "markets";
+}) {
+  const user = await getAuthUser();
+  const profile = user ? await getCurrentUserProfile() : null;
+
+  return (
+    <Header
+      activePath={activePath}
+      userEmail={user?.email ?? null}
+      profile={profile}
+    />
   );
 }
